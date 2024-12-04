@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Theme Editor</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.0.0/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-gray-50">
+    <!-- Tab navigation -->
+    <div class="flex justify-center space-x-4 mt-4">
+      <button id="lightTab" class="bg-blue-500 text-white py-2 px-4 rounded">
+        Light Theme
+      </button>
+      <button id="darkTab" class="bg-gray-800 text-white py-2 px-4 rounded">
+        Dark Theme
+      </button>
+    </div>
+
+    <div class="container mt-8 mx-auto p-4">
+      <h2 id="themeType" class="text-2xl mb-4">Light Theme</h2>
+
+      <!-- Color Palette -->
+      <div id="colorPalette" class="space-y-4">
+        <!-- Example Color Input -->
+        <div>
+          <label for="light_onSurface" class="block">Light onSurface</label>
+          <input
+            id="light_onSurface"
+            type="color"
+            value="#ffffff"
+            class="w-full mt-2"
+          />
+        </div>
+        <div>
+          <label for="dark_onSurface" class="block">Dark onSurface</label>
+          <input
+            id="dark_onSurface"
+            type="color"
+            value="#000000"
+            class="w-full mt-2"
+          />
+        </div>
+      </div>
+
+      <button
+        onclick="saveTheme()"
+        class="w-full bg-green-500 text-white py-2 rounded-lg mt-6"
+      >
+        Save Theme
+      </button>
+    </div>
+
+    <script>
+      const lightTab = document.getElementById("lightTab");
+      const darkTab = document.getElementById("darkTab");
+      const themeTypeLabel = document.getElementById("themeType");
+      const colorPalette = document.getElementById("colorPalette");
+
+      lightTab.addEventListener("click", () => switchTheme("light"));
+      darkTab.addEventListener("click", () => switchTheme("dark"));
+
+      function switchTheme(themeType) {
+        themeTypeLabel.textContent = `${
+          themeType.charAt(0).toUpperCase() + themeType.slice(1)
+        } Theme`;
+        colorPalette.querySelectorAll("input").forEach((input) => {
+          input.id = `${themeType}_${input.id.split("_")[1]}`;
+        });
+      }
+
+      async function saveTheme() {
+        const themeType = themeTypeLabel.textContent
+          .toLowerCase()
+          .replace(" theme", "");
+        const colors = {};
+
+        document.querySelectorAll("#colorPalette input").forEach((input) => {
+          colors[input.id] = input.value;
+        });
+
+        try {
+          const response = await fetch("/saveTheme", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ themeType, colors }),
+          });
+
+          const data = await response.json();
+          alert(data.message);
+        } catch (error) {
+          alert("Error saving theme data.");
+        }
+      }
+    </script>
+  </body>
+</html>

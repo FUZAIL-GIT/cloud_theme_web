@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Upload Service Account</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.0.0/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="flex items-center justify-center h-screen bg-gray-100">
+    <div class="max-w-lg w-full p-8 bg-white rounded-lg shadow-md">
+      <h1 class="text-xl font-semibold mb-4">Upload Service Account</h1>
+      <input
+        type="file"
+        id="service-account-file"
+        class="mb-4"
+        accept=".json"
+      />
+      <button
+        onclick="uploadFile()"
+        class="w-full bg-blue-500 text-white py-2 rounded-lg"
+      >
+        Upload
+      </button>
+    </div>
+
+    <script>
+      async function uploadFile() {
+        const fileInput = document.getElementById("service-account-file");
+        const file = fileInput.files[0];
+        if (!file) {
+          alert("Please upload a service account file.");
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = async function (event) {
+          const fileContent = event.target.result;
+          try {
+            const response = await fetch("/uploadServiceAccount", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ file: fileContent }),
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+              localStorage.setItem(
+                "serviceAccount",
+                JSON.stringify(fileContent)
+              ); // Cache in local storage
+              window.location.href = "/theme"; // Redirect to theme editor page
+            } else {
+              alert(data.error || "Failed to upload service account.");
+            }
+          } catch (error) {
+            console.error(error);
+            alert("An error occurred while uploading.");
+          }
+        };
+        reader.readAsText(file);
+      }
+    </script>
+  </body>
+</html>
